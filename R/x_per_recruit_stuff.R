@@ -138,13 +138,13 @@ ypr <- function(df,
   f01 <- x$x[i]
   
   x <- spline(res$f,res$ssb,n=10*nrow(res))
-  x1  <- abs(x$y-0.35*max(res$ssb))
+  x1  <- abs(x$y-0.35*max(res$ssb,na.rm=T)) # check why returns one NaN
   ssb35 <- x$x[x1==min(x1)]
   
   refpts <- rep(0,4)
   names(refpts) <- c("f01","fmax","maxy","ssb35")
   refpts["f01"] <- f01
-  refpts["fmax"] <- fmax[1]
+  refpts["fmax"] <- fmax
   refpts["maxy"] <- maxy
   refpts["ssb35"] <- ssb35
   refpts <- reshape2::melt(refpts)
