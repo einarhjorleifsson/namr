@@ -35,33 +35,33 @@ ypra <- function(x,
   x$sel <- x$sel/mean(x$sel[x$age %in% a1:a2])
   
   x$f <- x$sel * fmort
-  x$z <- x$f + x$m
-  x$n <- x$nSSB <- x$y <- x$bio <- x$ssb <- NA
+  #x$z <- x$f + x$m
+  x$c <- x$nSSB  <- x$n <- NA
   
   x$n[1] <- recruitment
   x$nSSB[1] <- x$n[1] * exp(-(x$m[1]*x$pF[1] + x$f[1]*x$pM[1]))
-  
+  x$c[1] <- x$n[1] * exp(-0.5 *x$m[1]) *  x$f[1]
+
   n <- nrow(x)
   
   for(i in 1:(n-1)) {
-    x$n[i+1] <- x$n[i] * exp(-x$z[i])
+    x$n[i+1] <- (x$n[i] * exp(-0.5 * x$m[i]) - x$c[i]) * exp(-0.5 * x$m[i])
+    x$c[i+1] <- x$n[i+1] * exp(-0.5 * x$m[i+1]) * x$f[i+1]
     x$nSSB[i+1] <- x$n[i+1] * exp(-(x$m[i+1]*x$pM[i+1] + x$f[i+1]*x$pF[i+1]))
   }
   
   if(plusgroup) {
-    x$n[n] <- x$n[n]/(1-exp(-(x$z[n])))  # infinite quota sequence a/(1-q)
+    nplus <- (x$n[n] * exp(-x$m[n]/2) - x$c[n]) * exp(-x$m[n]/2)
+    q <- nplus/x$n[n]
+    x$n[n]  <- x$n[n]/(1-q)
     x$nSSB[n] <- x$n[n] * exp(-(x$m[i+1]*x$pM[i+1] + x$f[i+1]*x$pF[i+1]))
-  } else {
-    x$n[n] <- x$n[n-1] * exp(-(x$z[n-1]))
-    x$nSSB[n] <- x$n[n] * exp(-(x$m[n]*x$pM[n] + x$f[n]*x$pF[n]))
+    x$c[n] <- x$c[n]/(1-q)
   }
-  
-  x$c <- x$f/x$z * (1 - exp(-x$z)) * x$n
-  x$yield <- x$c * x$cW
+
   x$bio <- x$n * x$sW
-  x$exp <- x$n * exp(-0.5 * x$m) * x$cW * x$sel
   x$ssb <- x$nSSB * x$sW * x$mat
-  
+  x$exp <- x$n * exp(-0.5 * x$m) * x$cW * x$sel
+  x$yield <- x$c * x$cW
   return(x)
 }
 
@@ -96,7 +96,7 @@ ypr <- function(df,
 {
   
   # dummy stuff
-  summarise <- yield <- ssb <- NULL
+  #yield <- ssb <- NULL
   
   if(is.null(df$pM)) df$pM <- pM
   if(is.null(df$pF)) df$pF <- pF
@@ -124,9 +124,7 @@ ypr <- function(df,
     yprbyage$ssb[j]   <- tmp$ssb
   }
   
-  res <- plyr::ddply(yprbyage,c("f"),summarise,
-               yield=sum(yield),
-               ssb=sum(ssb))
+  res <- plyr::ddply(yprbyage,c("f"),summarise,yield=sum(yield),ssb=sum(ssb))
   
   x <- spline(res$f,res$yield,n=10*nrow(res))
   maxy <- max(x$y)
@@ -149,6 +147,10 @@ ypr <- function(df,
   refpts["fmax"] <- fmax[1]
   refpts["maxy"] <- maxy
   refpts["ssb35"] <- ssb35
+  refpts <- reshape2::melt(refpts)
+  refpts$variable <- rownames(refpts)
+  rownames(refpts) <- NULL
+  refpts <- refpts[,c("variable","value")]
   
   return(list(ypr=res,yprba=yprbyage,refpts=refpts))
 }

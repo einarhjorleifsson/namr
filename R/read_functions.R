@@ -32,12 +32,26 @@ read_rbx_hake <- function(infilename,outfilename,runname) {
   x2_names <- g[c(1,3,5,7,9)]
   x2_values <- as.numeric(g[c(2,4,6,8,10)])
   x2 <- data.frame(V1=x2_names,V2=x2_values)
+  sr_parameters <- x2
+  names(sr_parameters) <- c("variable","value")
   x <- rbind(x,x2)
   
   # 'ln(Likelihoods)
   p1 <- grep("Likelihoods",txt) + 1
   p2 <- grep("M                  ",txt)
   x2 <- str_clean(txt,p1,p2)
+  
+  likelihoods <- x2[1:9,]
+  names(likelihoods) <- c("variable","value")
+  
+  refpts <- x2[c(10,11,15,16,17),]
+  names(refpts) <- c("variable","value")
+  refpts <- rbind(refpts,data.frame(variable="Fmsy",value=refpts$value[5]/refpts$value[4]))
+  refpts$details <- c("Virgin ssb","Virgin exploitable biomass",
+                      "SSB at MSY","Exploitable biomass at MSY",
+                      "Maximum sustainable yield",
+                      "Fishing mortality resulting in MSY")
+  
   x <- rbind(x,x2)
   
   p1 <- grep("sigmaCPUE1",txt)
@@ -214,7 +228,8 @@ read_rbx_hake <- function(infilename,outfilename,runname) {
   
   rownames(rba) <- NULL
   
-  rbx <- list(rby=rby,rba=rba,rby.fit=rby.fit,rbya=rbya,xy_ssb.r=xy_ssb.r,tmp_out=tmp_out)
+  rbx <- list(rby=rby,rba=rba,rby.fit=rby.fit,rbya=rbya,xy_ssb.r=xy_ssb.r,
+              likelihoods=likelihoods,refpts=refpts,tmp_out=tmp_out)
   
   return(rbx)
 }
