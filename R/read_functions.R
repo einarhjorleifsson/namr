@@ -299,3 +299,118 @@ read_input_hake <- function(filename) {
   return(d)
 }
 
+#' @title read_sim_hake
+#' 
+#' @description Reads the simulation files for Hake.
+#' 
+#' @return Returns a list containing two data.frames, the raw data (raw) and
+#' summarized data (qua). The latter contains the 0.05, 0.25, 0.50, 0.75 and
+#' 0.95 percentiles as well as the mean.
+#' 
+#' @export
+#' 
+#' @param path The directory path where the Files are located files are located
+#' 
+read_sim_hake <- function(path) {
+  
+  # fingerplots
+  filename <- dir(path,pattern="fingerplots",full.names = TRUE)
+  p1 <- stringr::str_locate(filename,"fingerplots_")[,2] + 1
+  p2 <- stringr::str_locate(filename,".out")[,1] - 1
+  runname <- as.numeric(stringr::str_sub(filename,p1,p2))
+  for (i in 1:length(filename)) {
+    x <- read.table(filename[i])
+    names(x) <- c("year","TAC","B_B1990","exp")
+    n <- length(unique(x$year))
+    iter <- nrow(x)/n
+    x$iter <- rep(1:iter,each=n)
+    x$run <- runname[i]
+    if(i == 1) {
+      raw <- x
+    } else {
+      raw <- rbind(raw,x)}
+  }
+  
+  # Economic
+  filename <- dir(path,pattern="Economic",full.names = TRUE)
+  p1 <- stringr::str_locate(filename,"Economic_")[,2] + 1
+  p2 <- stringr::str_locate(filename,".out")[,1] - 1
+  runname <- as.numeric(stringr::str_sub(filename,p1,p2))
+  for (i in 1:length(filename)) {
+    x <- read.table(filename[i])
+    names(x) <- c("year","TAC","value","employm","profit","vessel1","vessel2")
+    n <- length(unique(x$year))
+    iter <- nrow(x)/n
+    x$iter <- rep(1:iter,each=n)
+    x$run <- runname[i]
+    if(i == 1) {
+      raw2 <- x
+    } else {
+      raw2 <- rbind(raw2,x)}
+  }
+  raw <- plyr::join(raw,raw2[,-2],by=c("year","iter","run"))
+  
+  ## Depletion
+  #filename <- dir(path,pattern="Depletion",full.names = TRUE)
+  #p1 <- stringr::str_locate(filename,"Depletion_")[,2] + 1
+  #p2 <- stringr::str_locate(filename,".out")[,1] - 1
+  #runname <- as.numeric(stringr::str_sub(filename,p1,p2))
+  #for (i in 1:length(filename)) {
+  #  x <- read.table(filename[i])
+  #  names(x) <- c("year","TAC","ssb","ssb_virgin")
+  #  n <- length(unique(x$year))
+  #  iter <- nrow(x)/n
+  #  x$iter <- rep(1:iter,each=n)
+  #  x$run <- runname[i]
+  #  if(i == 1) {
+  #    raw2 <- x
+  #  } else {
+  #    raw2 <- rbind(raw2,x)}
+  #}
+  #raw <- plyr::join(raw,raw2[,-2],by=c("year","iter","run"))
+    
+  q <- reshape2::melt(raw,c("year","iter","run"))
+  q <- plyr::ddply(q,c("year","run","variable"),summarize,
+             q05=quantile(value,0.05,na.rm=T),
+             q25=quantile(value,0.25,na.rm=T),
+             q50=quantile(value,0.50,na.rm=T),
+             q75=quantile(value,0.75,na.rm=T),
+             q95=quantile(value,0.95,na.rm=T),
+             m=mean(value,na.rm=T))
+  return(list(raw=raw,qua=q))
+}
+
+################################################################################
+## Incomplete stuff below
+#read_std_hake <- function(filename,runname) 
+#{
+#  d <- read.table(filename,header = TRUE,sep="")
+#  return(d)
+#}
+
+##tBy/tB1 tBlastyear/B1990 AIKE spwnlastyear/spwnlast presentvalue
+#read_stats_hake <- function(filename) 
+#{
+  #filename <- "ass/Results/stats.out"
+#  txt <- readLines(filename)
+#  txt <- str_trim(txt)
+#  return(txt)
+#}
+
+#read_depletion_hake <- function(filename) {
+#  d <- read.table(filename)
+#  names(d) <- c("year","TAC","ssb","ssb_virgin")
+#  n <- length(unique(d$year))
+#  iter <- nrow(d)/n
+#  d$iter <- rep(1:iter,each=n)
+#  return(d)
+#}
+
+#read_depletion1990_hake <- function(filename) {
+#  d <- read.table(filename)
+#  names(d) <- c("year","TAC","bio_bio1990")
+#  n <- length(unique(d$year))
+#  iter <- nrow(d)/n
+#  d$iter <- rep(1:iter,each=n)
+#  return(d)
+#}
