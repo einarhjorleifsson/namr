@@ -1,5 +1,7 @@
 #' @title Read in Lowestoft-format VPA data
 #' 
+#' @description Read in Lowestoft-format VPA data
+#' 
 #' @export
 #' 
 #' @param filename The name of the file to read in
@@ -61,6 +63,8 @@ read_ibya_lowestoft <- function(path,Scale=1) {
 }
 
 #' @title Read Lowestoft-format survey data
+#' 
+#' @description Read Lowestoft-format survey data
 #' 
 #' @export
 #' 

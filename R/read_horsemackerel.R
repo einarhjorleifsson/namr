@@ -1,5 +1,5 @@
 # To Do
-# * Put recruitment (age 0) from the N-matrix into rby
+# * Calculate oC and pC as a sum for the whole fleet and put into rbya
 
 
 #' @title Read Horsemackerel run
@@ -43,10 +43,13 @@ read_hmac <- function(filename) {
 
 
 #' Read Horse Mackerel configure file
-#'
-#' @param filename 
+#' 
+#' @description XXXX
+#' 
+#' @param filename XXX
 #' 
 #' @export
+#' 
 read_conf_hmac <- function(filename) {
   
   cntr <- read.table(filename,

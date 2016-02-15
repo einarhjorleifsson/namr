@@ -2,7 +2,7 @@ Package: namr
 Title: What the package does (one line)
 Version: 0.1
 Authors@R: "Einar Hjorleifsson <einar.hjorleifsson@gmail.com> [aut, cre]"
-Description: What the package does (one paragraph)
+Description: What the package does (one paragraph).
 Depends:
     R (>= 3.1.1)
 Imports:

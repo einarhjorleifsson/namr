@@ -10,6 +10,6 @@ read_conf_hmac(filename)
 \item{filename}{}
 }
 \description{
-Read Horse Mackerel configure file
+XXXX
 }
 
