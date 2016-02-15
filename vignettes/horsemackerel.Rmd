@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r, warning = FALSE}
-#devtools::install_github("einarhjorleifsson/namr")
+#devtools::install_github("einarhjorleifsson/namr", build_vignettes = TRUE)
 library(namr)
 library(ggplot2)
 library(tidyr)
