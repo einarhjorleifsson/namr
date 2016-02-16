@@ -38,7 +38,7 @@ read_hmac <- function(filename) {
     dplyr::ungroup() %>% 
     dplyr::right_join(rbx$rby, by = "year")
     
-  return(list(rby = rby, rbya = rbya, rbyf = rbyf, rbaf = rbx1$rbaf, rbyaf = rbx$rbyaf))
+  return(list(rby = rby, rbya = rbya, rbyf = rbyf, rbaf = rbx$rbaf, rbyaf = rbx$rbyaf))
   
 }
 
