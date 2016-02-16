@@ -10,8 +10,7 @@ Imports:
     magrittr,
     plyr,
     reshape2,
-    stringr,
-    tidyr
+    stringr
 License: GPL-2
 LazyData: true
 Suggests:
