@@ -20,8 +20,9 @@ read_hmac <- function(filename) {
   rbya <- 
     rbx$rbya %>% 
     dplyr::left_join(ibx$ibya, by = c("year", "age")) %>% 
-    dplyr::select(year, age, cW1, cW2, n, f)
-  
+    dplyr::select(year, age, cW1, cW2, n, f) %>% 
+    dplyr::left_join(ibx$iba, by = "age") # include the maturity
+  rbya$m <- 0.45   # Natural mortality
   # By year and fleet
   rbyf <- 
     rbx$rbyf %>%
@@ -33,11 +34,11 @@ read_hmac <- function(filename) {
     rbyf %>% 
     dplyr::select(year, landings) %>% 
     dplyr::group_by(year) %>%
-    dplyr::summarise(landings = sum(landings)) %>% 
+    dplyr::summarise(landings = sum(landings, na.rm = TRUE)) %>% 
     dplyr::ungroup() %>% 
     dplyr::right_join(rbx$rby, by = "year")
     
-  return(list(rby = rby, rbya = rbya, rbyf = rbyf, rbyaf = rbx$rbyaf))
+  return(list(rby = rby, rbya = rbya, rbyf = rbyf, rbaf = rbx1$rbaf, rbyaf = rbx$rbyaf))
   
 }
 
@@ -96,7 +97,8 @@ read_ibx_hmac <- function(filename) {
   iba <-  
     as.data.frame(d) %>% 
     tidyr::separate(d, AGES, sep = "\t", convert = TRUE) %>% 
-    tidyr::gather(age, mat)
+    tidyr::gather(age, mat) %>% 
+    mutate(age = as.integer(age))
   
   # ----------------------------------------------------------------------------
   # By year and fleet
@@ -556,6 +558,7 @@ read_rbx_hmac <- function(filename) {
     dplyr::summarise(f = sum(f)) %>% 
     dplyr::ungroup() %>% 
     dplyr::right_join(rbya, by = c("year", "age"))
+  
   
   # ----------------------------------------------------------------------------
   # Put survey oU and pU with other fleets

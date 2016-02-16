@@ -7,7 +7,7 @@
 read_conf_hmac(filename)
 }
 \arguments{
-\item{filename}{}
+\item{filename}{XXX}
 }
 \description{
 XXXX
