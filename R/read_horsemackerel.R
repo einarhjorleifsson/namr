@@ -21,8 +21,10 @@ read_hmac <- function(filename) {
     rbx$rbya %>% 
     dplyr::left_join(ibx$ibya, by = c("year", "age")) %>% 
     dplyr::select(year, age, cW1, cW2, n, f) %>% 
-    dplyr::left_join(ibx$iba, by = "age") # include the maturity
-  rbya$m <- 0.45   # Natural mortality
+    dplyr::left_join(ibx$iba, by = "age") %>% # include the maturity
+    dplyr::mutate(m = 0.45,   # Natural mortality
+                  pC = f/(m+f) * (1 - exp(-(m+f))) * n,
+                  pY = pC * cW2)
   # By year and fleet
   rbyf <- 
     rbx$rbyf %>%
